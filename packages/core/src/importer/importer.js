@@ -1,14 +1,17 @@
+const path = require('node:path');
+
 class Importer {
 	// Built as method to simplify testing
 	static require(path) {
 		return require(path);
 	}
 
-	static #import_path({ config, path }, current_index=0) {
+	static #import_path({ config, path: file_path }, current_index=0) {
+		const absolute_path = path.join(process.cwd(), file_path);
 		let imported_tasks;
 		try {
 			// using global.require to be able to unit-test
-			imported_tasks = this.require(path);
+			imported_tasks = this.require(absolute_path);
 		} catch(e) {
 			console.error(e);
 			return Promise.resolve();

@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 const os = require('node:os');
 const argumentate = require('argumentate');
 
@@ -11,6 +13,10 @@ const { options, variables } = argumentate({
 		x: {
 			key: 'concurrency',
 			help: 'How many workers to spawn. Default is "os.cpus().length"'
+		},
+		t: {
+			key: 'tasks',
+			help: 'Path to task discovery file. Can be used multiple times'
 		}
 	},
 	config: {
@@ -24,13 +30,24 @@ if(options.config) {
 	process.env.ASSEMBLY_LINE_CONFIG = options.config;
 }
 
-const { config } = require('./config')({
-	system: {
-		worker_count: options.concurrency || os.cpus().length
-	}
-});
+const assembly_config = {};
+if(options.concurrency) {
+	assembly_config.system = {
+		worker_count: options.concurrency
+	};
+}
 
-const AssemblyLine = require('./assembly');
+if(options.tasks?.length) {
+	const tasks = Array.isArray(options.tasks) ? options.tasks : [options.tasks];
+	assembly_config.tasks = {
+		discovery_paths: tasks
+	};
+}
+
+
+const { config } = require('../src/config')(assembly_config);
+
+const AssemblyLine = require('../src/assembly');
 
 al = new AssemblyLine({ config });
 

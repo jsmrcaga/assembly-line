@@ -4,8 +4,13 @@ const { registry } = require('../registry/registry');
 const Importer = require('../importer/importer');
 
 class AssemblyWorker {
+	// Can be overridden if somoeone uses the worker as a standalone runner
+	constructor(worker_config=config) {
+		this.config = worker_config;
+	}
+
 	run() {
-		const { tasks: { discovery_paths } } = config;
+		const { tasks: { discovery_paths } } = this.config;
 
 		// Manage imports
 		return Importer.discover_tasks({
