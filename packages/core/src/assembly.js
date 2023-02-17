@@ -21,6 +21,9 @@ class AssemblyLine {
 		const worker_path = path.join(__dirname, './worker/index.js');
 		const worker = new WorkerThread(worker_path, {
 			env: SHARE_ENV,
+			workerData: {
+				config: this.config
+			}
 		});
 
 		worker.on('online', (data) => {
