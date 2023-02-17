@@ -1,0 +1,19 @@
+{
+  "name": "@control/assembly-line",
+  "version": "0.0.0",
+  "description": "A very simlpe task manager to include on your main codebase",
+  "main": "src/index.js",
+  "bin": {
+    "assembly-line": "cli/cli.js"
+  },
+  "scripts": {
+    "test": "mocha --recursive --exit ./test "
+  },
+  "author": "Jo Colina <jo@jocolina.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "chai": "^4.3.7",
+    "mocha": "^10.2.0",
+    "sinon": "^15.0.1"
+  }
+}
