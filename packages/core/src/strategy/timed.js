@@ -6,7 +6,7 @@ class Timed extends Strategy {
 			cooldown_ms=1_000,
 		} = this.config;
 
-		return this.scheduler.consume().then(task => {
+		return this.scheduler.consume().then(tasks => {
 			// No need to wait since this strategy just times the consumption
 			const tasks_promises = tasks.map(t => t.run());
 			return;
