@@ -1,0 +1,9 @@
+**/node_modules/
+
+**/test.js
+
+# Terraform
+**/*.tfvars
+**/*.tfplan
+**/*.tfstate*
+**/.terraform/
