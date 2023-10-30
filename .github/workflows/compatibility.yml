@@ -1,0 +1,23 @@
+name: Compatibility testing
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  test:
+    name: Test all packages
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@master
+
+      - uses: actions/cache@master
+        id: cache-node-modules
+        with:
+          path: node_modules
+          key: npm-${{ hashFiles('package-lock.json') }}
+
+      - run: npm i
+
+      - run: npm test -ws
