@@ -11,7 +11,7 @@ describe('Scheduler', () => {
 			const scheduler = new FakeScheduler();
 
 			expect(() => {
-				scheduler.schedule({ eta: 'fake-date', offset: 45 });
+				scheduler.schedule({ task_name: 'fake-task', eta: 'fake-date', offset: 45 });
 			}).to.throw(Error, 'Date & Offset provided, only one permitted');
 		});
 
@@ -20,6 +20,7 @@ describe('Scheduler', () => {
 
 			expect(() => {
 				scheduler.schedule({
+					task_name: 'fake-task',
 					eta: new Date(Date.now() - 1000).toISOString()
 				});
 			}).to.throw(Error, 'Date must be in the future');
@@ -30,6 +31,7 @@ describe('Scheduler', () => {
 
 			expect(() => {
 				scheduler.schedule({
+					task_name: 'fake-task',
 					offset: -14
 				});
 			}).to.throw(Error, 'Offset must be greater than 0');
@@ -40,6 +42,7 @@ describe('Scheduler', () => {
 
 			expect(() => {
 				scheduler.schedule({
+					task_name: 'fake-task',
 					expires: new Date(Date.now() - 1000).toISOString()
 				});
 			}).to.throw(Error, 'Cannot schedule task which expires in the past');
@@ -110,7 +113,7 @@ describe('Scheduler', () => {
 
 		for(const config of [{throw_on_invalid_task: false}, {}]) {
 			it('Should not throw an error if consumed object is not a task (config)', done => {
-				consume_stub = Sinon.stub(FakeScheduler.prototype, 'consume_tasks').returns([{ test: true }]);
+				consume_stub = Sinon.stub(FakeScheduler.prototype, 'consume_tasks').returns([{ task_name: 'fake-task', test: true }]);
 				const scheduler = new FakeScheduler(config);
 
 				scheduler.consume().then(() => done()).catch(e => done(e));
@@ -118,7 +121,7 @@ describe('Scheduler', () => {
 		}
 
 		it('Should throw an error if consumed object is not a task (config)', () => {
-			consume_stub = Sinon.stub(FakeScheduler.prototype, 'consume_tasks').returns([{ test: true }]);
+			consume_stub = Sinon.stub(FakeScheduler.prototype, 'consume_tasks').returns([{ task_name: 'fake-task', test: true }]);
 			const scheduler = new FakeScheduler({
 				throw_on_invalid_task: true
 			});
@@ -131,8 +134,8 @@ describe('Scheduler', () => {
 			});
 		});
 
-		for(const result of [[{ test: true }], Promise.resolve([{ test: true }])]) {
-			it('Should return a promise independently on what the consumer returned', () => {
+		for(const result of [[{ task_name: 'fake-task', test: true }], Promise.resolve([{ task_name: 'fake-task', test: true }])]) {
+			it('Should return a promise independently on what the consumer returned (promise or value)', () => {
 				consume_stub = Sinon.stub(FakeScheduler.prototype, 'consume_tasks').returns(result);
 				const scheduler = new FakeScheduler({
 					throw_on_invalid_task: true

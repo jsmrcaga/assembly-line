@@ -5,6 +5,8 @@ on:
     types: [opened, synchronize]
     paths: 'packages/core/**'
 
+  # This should work with GitHub releases as well
+  # But will publish on release created, not necessarily published
   push:
     tags:
       - v**-core

@@ -1,12 +1,12 @@
-const { config } = require('../config')();
+const get_config = require('../config');
 const { scheduler, strategy } = require('../config/init');
 const { registry } = require('../registry/registry');
 const Importer = require('../importer/importer');
 
 class AssemblyWorker {
 	// Can be overridden if somoeone uses the worker as a standalone runner
-	constructor(worker_config=config) {
-		this.config = worker_config;
+	constructor(worker_config=null) {
+		this.config = worker_config || get_config();
 	}
 
 	run() {
