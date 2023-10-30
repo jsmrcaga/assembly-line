@@ -1,0 +1,59 @@
+name: AWS SQS Scheduler - Test & Publish
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    paths: 'packages/core/**'
+
+  # This should work with GitHub releases as well
+  # But will publish on release created, not necessarily published
+  push:
+    tags:
+      - v**-aws-sqs
+
+defaults:
+  run:
+    working-directory: packages/aws-sqs
+
+jobs:
+  test:
+    name: Test @control/assembly-line-aws-sqs
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@master
+
+      - uses: actions/cache@master
+        id: cache-node-modules
+        with:
+          path: node_modules
+          key: npm-${{ hashFiles('package-lock.json') }}
+
+      - run: npm i
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+
+      - run: npm test
+
+  publish:
+    name: Publish @control/assembly-line-aws-sqs
+    runs-on: ubuntu-latest
+
+    needs:
+      - test
+
+    if: ${{ github.event_name == 'push' }}
+
+    steps:
+      - name: Get version
+        id: version
+        # TODO: maybe check refs/tags as well
+        run: echo "version=$(echo "${{ github.event.push.ref }}" | sed -e 's/\-aws-sqs//')" >> $GITHUB_OUTPUT
+
+      - uses: actions/checkout@master
+
+      - run: npm version ${{ steps.version.outputs.version }} --no-git-tag-version
+        name: Set package version ${{ steps.version.outputs.version }}
+
+      - run: npm publish
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

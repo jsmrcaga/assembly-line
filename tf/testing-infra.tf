@@ -1,0 +1,3 @@
+module testing {
+	source = "./testing"
+}
