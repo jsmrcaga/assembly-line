@@ -1,10 +1,13 @@
-**/node_modules/
-
-**/test.js
-**/test-tasks.js
+node_modules/
 
 # Terraform
+**/.terraform/
 **/*.tfvars
 **/*.tfplan
 **/*.tfstate*
-**/.terraform/
+
+**/aws.cred
+
+
+**/live-test*
+
