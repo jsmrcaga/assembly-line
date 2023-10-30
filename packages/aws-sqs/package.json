@@ -1,0 +1,19 @@
+{
+  "name": "@control/assembly-line-aws-sqs",
+  "version": "0.0.0",
+  "description": "Assembly Line Scheduler and Consumer for AWS SQS",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha --recursive --ignore test/live/** --exit ./test"
+  },
+  "author": "Jo Colina <jo@jocolina.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@aws-sdk/client-sqs": "^3.321.1"
+  },
+  "devDependencies": {
+    "chai": "^4.3.10",
+    "mocha": "^10.2.0",
+    "sinon": "^17.0.0"
+  }
+}
