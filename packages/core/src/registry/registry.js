@@ -1,10 +1,11 @@
-const { config } = require('../config')();
+const get_config = require('../config');
 const Crypto = require('crypto');
 
 class Registry {
 	#registry = new Map();
 
 	register(name='anonymous_task', callback, options={}) {
+		const { config } = get_config();
 		const task_name = name ?? 'anonymous_task';
 		const is_registered = [...this.#registry.values()].filter(({ callback: cb }) => cb === callback);
 		// +1 because 2 are registered but with the new one makes 3

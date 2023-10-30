@@ -65,9 +65,9 @@ describe('Task decorator', () => {
 			delete require.cache[require.resolve('../../src/task/task-decorator')];
 			// Force fake scheduler with configgetter
 			require.cache[config_cache_path] = {
-				exports: {
+				exports: () => ({
 					scheduler: new FakeScheduler()
-				}
+				})
 			};
 
 			scheduler_schedule_stub = Sinon.stub(FakeScheduler.prototype, 'schedule');
@@ -116,21 +116,21 @@ describe('Task decorator', () => {
 				timeout: 150,
 				eta: '2021-01-01T00:00:00.000Z',
 				expires: '2021-01-01T00:00:00.001Z',
-				retries: 1
+				max_retries: 1
 			});
 			decorated_fn.schedule({
 				args: [4, 5, 6],
 				timeout: 250,
 				eta: '2022-01-01T00:00:00.000Z',
 				expires: '2022-01-01T00:00:00.001Z',
-				retries: 2
+				max_retries: 2
 			});
 			decorated_fn.schedule({
 				args: [7, 8, 9],
 				timeout: 350,
 				eta: '2023-01-01T00:00:00.000Z',
 				expires: '2023-01-01T00:00:00.001Z',
-				retries: 3
+				max_retries: 3
 			});
 
 			expect(scheduler_schedule_stub.firstCall.args).to.be.eql(['task_fn__task', {
@@ -138,21 +138,51 @@ describe('Task decorator', () => {
 				timeout: 150,
 				eta: '2021-01-01T00:00:00.000Z',
 				expires: '2021-01-01T00:00:00.001Z',
-				retries: 1
+				max_retries: 1
 			}]);
 			expect(scheduler_schedule_stub.secondCall.args).to.be.eql(['task_fn__task', {
 				args: [4, 5, 6],
 				timeout: 250,
 				eta: '2022-01-01T00:00:00.000Z',
 				expires: '2022-01-01T00:00:00.001Z',
-				retries: 2
+				max_retries: 2
 			}]);
 			expect(scheduler_schedule_stub.lastCall.args).to.be.eql(['task_fn__task', {
 				args: [7, 8, 9],
 				timeout: 350,
 				eta: '2023-01-01T00:00:00.000Z',
 				expires: '2023-01-01T00:00:00.001Z',
-				retries: 3
+				max_retries: 3
+			}]);
+		});
+
+		it('Schedules a task with random options', () => {
+			const task_decorator = require('../../src/task/task-decorator');
+
+			const task_fn = (a, b, c) => a + b + c;
+			// Using default registry should be fine
+			const decorated_fn = task_decorator(task_fn);
+
+			decorated_fn.schedule({
+				args: [1, 2, 3],
+				random_option_1: 'plep',
+				random_option_2: 54,
+				random_option_3: {
+					an: 'object'
+				}
+			})
+
+			expect(scheduler_schedule_stub.firstCall.args).to.be.eql(['task_fn__task', {
+				args: [1, 2, 3],
+				random_option_1: 'plep',
+				random_option_2: 54,
+				random_option_3: {
+					an: 'object'
+				},
+				eta: null,
+				expires: null,
+				max_retries: undefined,
+				timeout: null
 			}]);
 		});
 	});

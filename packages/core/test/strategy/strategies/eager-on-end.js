@@ -107,6 +107,7 @@ describe('Strategies - Eager on End', () => {
 	it('Should consume a task & continue if it fails', done => {
 		const task = new Task({ task_name: 'fake task' });
 		const stub = Sinon.stub(MockScheduler.prototype, 'consume').resolves([task]);
+		const schedule_stub = Sinon.stub(MockScheduler.prototype, 'schedule').resolves();
 
 		// Note that we use rejects here
 		const task_stub = Sinon.stub(Task.prototype, 'run').rejects();
@@ -127,6 +128,7 @@ describe('Strategies - Eager on End', () => {
 			strategy.stop();
 			stub.restore();
 			task_stub.restore();
+			schedule_stub.restore();
 
 			// 0ms - 1st call
 			// 20ms - 2nd call

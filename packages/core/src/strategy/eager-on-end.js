@@ -19,16 +19,13 @@ class EagerOnEnd extends Strategy {
 			}
 
 			// Run task
-			const tasks_promises = tasks.map(t => t.run());
+			return this.run_tasks(tasks).then(() => {
+				if(cooldown_ms) {
+					return delay(() => this.consume(), cooldown_ms);
+				}
 
-			// Does not matter if some fail
-			return Promise.allSettled(tasks_promises);
-		}).then(() => {
-			if(cooldown_ms) {
-				return delay(() => this.consume(), cooldown_ms);
-			}
-
-			return this.consume();
+				return this.consume();
+			});
 		});
 	}
 }

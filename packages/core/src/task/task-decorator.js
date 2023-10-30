@@ -1,4 +1,4 @@
-const { scheduler } = require('../config/init');
+const init_config = require('../config/init');
 
 const { registry: default_registry } = require('../registry/registry');
 
@@ -19,13 +19,16 @@ function task_decorator(callback, { registry=default_registry, ...options }={}) 
 	// Schedule manually with options
 	Object.defineProperty(wrapped_task, 'schedule', {
 		writable: false,
-		value: ({ timeout=null, eta=null, expires=null, args=[], retries }) => {
-			scheduler.schedule(task_name, {
+		value: ({ timeout=null, eta=null, expires=null, args=[], max_retries, ...rest }) => {
+			const { scheduler } = init_config();
+			return scheduler.schedule(task_name, {
 				timeout,
 				eta,
 				expires,
-				retries,
-				args
+				max_retries,
+				args,
+				...options,
+				...rest
 			});
 		}
 	});
@@ -34,7 +37,8 @@ function task_decorator(callback, { registry=default_registry, ...options }={}) 
 	Object.defineProperty(wrapped_task, 'delay', {
 		writable: false,
 		value: (...args) => {
-			scheduler.queue(task_name, { args });
+			const { scheduler } = init_config();
+			return scheduler.queue(task_name, { args, ...options });
 		}
 	});
 

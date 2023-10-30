@@ -15,7 +15,8 @@ describe('Config', () => {
 		const configgetter = require(CONFIG_PATH);
 		const { config } = configgetter();
 
-		const { scheduler, strategy } = require(`${CONFIG_PATH}/init`);
+		const init_config = require(`${CONFIG_PATH}/init`);
+		const { scheduler, strategy } = init_config();
 
 		expect(scheduler).to.be.instanceof(Scheduler);
 		expect(strategy).to.be.instanceof(Strategy);

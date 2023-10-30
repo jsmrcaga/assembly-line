@@ -5,7 +5,7 @@ class Task {
 		task_name,
 		args=[],
 		options: {
-			exp,
+			expires,
 			eta
 		} = {}
 	}={}) {
@@ -16,28 +16,57 @@ class Task {
 		this.task_name = task_name;
 		this.args = args;
 		this.options = {
-			exp,
+			expires,
 			eta
 		};
 	}
 
+	static to_task({ task_name, args, expires, eta, ...rest }) {
+		return new this({
+			task_name,
+			args,
+			options: {
+				expires,
+				eta,
+				...rest
+			}
+		});
+	}
+
 	static is_task(task) {
-		return Object.keys(task).includes('task_name');
+		return Object.keys(task).includes('task_name') && typeof task.task_name === 'string';
+	}
+
+	toJSON() {
+		// Maps to constructor
+		const { task_name, args, options } = this;
+		return {
+			task_name,
+			args,
+			options
+		};
 	}
 
 	run() {
-		const { exp } = this;
-		if(new Date(exp) > new Date()) {
-			// Task expired
-			throw new Error('Task expired');
-		}
+		return new Promise((resolve, reject) => {
+			const { expires } = this;
+			if(new Date(expires) > new Date()) {
+				// Task expired
+				throw new Error('Task expired');
+			}
 
-		const { callback, options } = registry.find(this.task_name);
-		if(!callback) {
-			throw new Error(`Could not find task ${this.task_name}`);
-		}
+			const { callback, options } = registry.find(this.task_name);
+			if(!callback) {
+				throw new Error(`Could not find task ${this.task_name}`);
+			}
 
-		return callback.apply(callback, this.args);
+			try {
+				const result = callback.apply(callback, this.args);
+				resolve(result);
+			} catch(e) {
+				reject(e);
+			}
+		});
 	}
 }
 
