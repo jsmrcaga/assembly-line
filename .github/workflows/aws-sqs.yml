@@ -3,7 +3,9 @@ name: AWS SQS Scheduler - Test & Publish
 on:
   pull_request:
     types: [opened, synchronize]
-    paths: 'packages/aws-sqs/**'
+    paths:
+      - 'packages/aws-sqs/**'
+      - '.github/workflows/aws-sqs.yml'
 
   # This should work with GitHub releases as well
   # But will publish on release created, not necessarily published
@@ -23,11 +25,12 @@ jobs:
         id: cache-node-modules
         with:
           path: node_modules
-          key: npm-${{ hashFiles('package-lock.json') }}
+          key: npm-${{ hashFiles('packages/aws-sqs/package-lock.json') }}-aws-sqs
 
       # Cannot if-cache because we need to initialize all
       # packages on the chain (so we can require @control/assembly-line)
       - run: npm i
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
 
       - run: npm test -w packages/aws-sqs
 
