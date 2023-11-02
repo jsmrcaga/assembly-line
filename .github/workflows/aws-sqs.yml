@@ -21,15 +21,7 @@ jobs:
     steps:
       - uses: actions/checkout@master
 
-      - uses: actions/cache@master
-        id: cache-node-modules
-        with:
-          path: node_modules
-          key: npm-${{ hashFiles('packages/aws-sqs/package-lock.json') }}-aws-sqs
-
-      # Cannot if-cache because we need to initialize all
-      # packages on the chain (so we can require @control/assembly-line)
-      - run: npm i
+      - run: npm i -ws
         if: steps.cache-node-modules.outputs.cache-hit != 'true'
 
       - run: npm test -w packages/aws-sqs
