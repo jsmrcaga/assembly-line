@@ -12,13 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@master
 
-      - uses: actions/cache@master
-        id: cache-node-modules
-        with:
-          path: node_modules
-          key: npm-${{ hashFiles('package-lock.json') }}-compat
-
-      - run: npm i
+      - run: npm i -ws
         if: steps.cache-node-modules.outputs.cache-hit != 'true'
 
       - run: npm test -ws
