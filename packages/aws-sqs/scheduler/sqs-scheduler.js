@@ -29,7 +29,7 @@ class SQSScheduler extends Scheduler {
 		this.client = new SQSClient(this.config.sqs_client);
 	}
 
-	schedule_task({ task_name, args, expires, eta, sqs_queue_url=null, ...rest }) {
+	schedule_task({ task_name, eta, sqs_queue_url=null, ...rest }) {
 		// Put task into SQS queue, we can also add a signature later
 
 		// if offset was specified, eta was automatically calculated
@@ -49,8 +49,6 @@ class SQSScheduler extends Scheduler {
 			QueueUrl: sqs_queue_url || this.config.sqs_queue_url,
 			MessageBody: JSON.stringify(Task.to_task({
 				task_name,
-				args,
-				exp: expires,
 				eta,
 				...rest
 			})),

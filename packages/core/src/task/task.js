@@ -6,7 +6,8 @@ class Task {
 		args=[],
 		options: {
 			expires,
-			eta
+			eta,
+			...rest
 		} = {}
 	}={}) {
 		if(!task_name) {
@@ -17,7 +18,8 @@ class Task {
 		this.args = args;
 		this.options = {
 			expires,
-			eta
+			eta,
+			...rest
 		};
 	}
 
@@ -35,6 +37,18 @@ class Task {
 
 	static is_task(task) {
 		return Object.keys(task).includes('task_name') && typeof task.task_name === 'string';
+	}
+
+	static is_max_retried(options = {}) {
+		if([null, undefined].includes(options?.max_retries)) {
+			return false;
+		}
+
+		if(!options.retries) {
+			return false;
+		}
+
+		return options.retries >= options.max_retries;
 	}
 
 	toJSON() {

@@ -12,15 +12,21 @@ class Scheduler extends Resolver {
 			throw new Error('Can only reschedule an instance of Task');
 		}
 
+		if(Task.is_max_retried(task.options)) {
+			// emit error
+			return Promise.resolve();
+		}
+
 		return this.schedule({
 			task_name: task.task_name,
 			args: task.args,
-			...task.options
-		})
+			...task.options,
+			retries: (task.options.retries || 0) + 1
+		});
 	}
 
 	// Scheduling
-	schedule({ eta, offset, task_name, args, expires, ...rest }={}) {
+	schedule({ task_name, args, eta, offset, expires, ...rest }={}) {
 		if(!task_name) {
 			throw new Error('Cannot schedule task without task_name');
 		}
@@ -47,8 +53,18 @@ class Scheduler extends Resolver {
 			eta = new Date(Date.now() + offset).toISOString();
 		}
 
+		if(Task.is_max_retried(rest)) {
+			throw new Error('Cannot schedule task because it has been retried enough');
+		}
 
-		return this.schedule_task({ eta, offset, task_name, args, expires, ...rest });
+		return this.schedule_task({
+			eta: eta || null,
+			offset: offset || null,
+			task_name,
+			args,
+			expires,
+			...rest
+		});
 	}
 
 	schedule_task() {
@@ -93,15 +109,20 @@ class Scheduler extends Resolver {
 					return false;
 				}
 
+				// TODO: emit errors
 				// It is possible that the task took too long to arrive
 				if(task.options?.expires && new Date(task.options?.expires).getTime() < Date.now()) {
+					return false;
+				}
+
+				if(Task.is_max_retried(task.options)) {
 					return false;
 				}
 
 				return true;
 			});
 
-			const { not_yet_tasks, allowed_tasks } = tasks.reduce((agg, t) => {
+			const { not_yet_tasks, allowed_tasks } = actual_tasks.reduce((agg, t) => {
 				const task = new Task(t);
 
 				if(task.options?.eta && new Date(task.options?.eta).getTime() > Date.now()) {

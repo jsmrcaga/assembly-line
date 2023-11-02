@@ -15,26 +15,28 @@ configure({
 
 const addNumbers = (a, b) => {
 	console.log('Will try to add', a, b);
+	throw new Error('err');
 	return a + b;
 };
 
 // Move this date to test ETAs
 const task = task_decorator(addNumbers, {
 	max_retries: 3,
-	eta: '2023-10-29T20:30:00.000Z'
 });
 
-// Send to SQS
-task.delay(Math.random(), Math.random()).then(e => {
-	console.log('Delayed!');
-}).catch(e => {
-	console.error("ERROR");
-	console.error(e);
-});
-
+// setInterval(() => {
+	// Send to SQS
+	task.delay(Math.random(), Math.random()).then(e => {
+		console.log('Delayed!');
+	}).catch(e => {
+		console.error("ERROR");
+		console.error(e);
+	});
+// }, 3_000);
 
 const { strategy } = get_config();
 
+console.log('Listening for new tasks...');
 strategy.consume().then(result => {
 	console.log('TASK RESULT', result);
 }).catch(e => {

@@ -161,5 +161,68 @@ describe('Scheduler', () => {
 				done();
 			}).catch(e => done(e));
 		});
+
+		it('Should not consume tasks that have been retried max_retries times', done => {
+			consume_stub = Sinon.stub(FakeScheduler.prototype, 'consume_tasks').returns([{
+				task_name: 'plep',
+				args: [1, 2, 3],
+				options: {
+					max_retries: 3,
+					retries: 3
+				}
+			}]);
+
+			const scheduler = new FakeScheduler({
+				throw_on_invalid_task: true
+			});
+
+			scheduler.consume().then(result => {
+				expect(result.length).to.be.eql(0);
+				done();
+			}).catch(e => done(e));
+		});
+	});
+
+	describe('Scheduling', () => {
+		it('Should not schedule tasks that have been retried max_retries times', () => {
+			const scheduler = new FakeScheduler({
+				throw_on_invalid_task: true
+			});
+
+			expect(() => scheduler.schedule({
+				task_name: 'plep',
+				args: [1, 2, 3],
+				max_retries: 3,
+				retries: 3
+			})).to.throw(Error, 'Cannot schedule task because it has been retried enough');
+		});
+
+		it('Should not re-schedule tasks that have been retried max_retries times', done => {
+			const schedule_stub = Sinon.stub(FakeScheduler.prototype, 'schedule').returns([{
+				task_name: 'plep',
+				args: [1, 2, 3],
+				options: {
+					max_retries: 3,
+					retries: 3
+				}
+			}]);
+
+			const scheduler = new FakeScheduler({
+				throw_on_invalid_task: true
+			});
+
+			scheduler.reschedule(new Task({
+				task_name: 'plep',
+				args: [1, 2, 3],
+				options: {
+					max_retries: 3,
+					retries: 3
+				}
+			})).then(() => {
+				expect(schedule_stub.callCount).to.be.eql(0);
+				done()
+			}).catch(e => done(e));
+
+		});
 	});
 });

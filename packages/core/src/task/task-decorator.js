@@ -22,12 +22,12 @@ function task_decorator(callback, { registry=default_registry, ...options }={}) 
 		value: ({ timeout=null, eta=null, expires=null, args=[], max_retries, ...rest }) => {
 			const { scheduler } = init_config();
 			return scheduler.schedule(task_name, {
+				...options,
 				timeout,
 				eta,
 				expires,
 				max_retries,
 				args,
-				...options,
 				...rest
 			});
 		}
