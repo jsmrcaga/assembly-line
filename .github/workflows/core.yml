@@ -3,17 +3,15 @@ name: Core - Test & Publish
 on:
   pull_request:
     types: [opened, synchronize]
-    paths: 'packages/core/**'
+    paths: 
+      - 'packages/core/**'
+      - '.github/workflows/core.yml'
 
   # This should work with GitHub releases as well
   # But will publish on release created, not necessarily published
   push:
     tags:
       - v**-core
-
-defaults:
-  run:
-    working-directory: packages/core
 
 jobs:
   test:
@@ -23,9 +21,16 @@ jobs:
     steps:
       - uses: actions/checkout@master
 
-      - run: npm i
+      - uses: actions/cache@master
+        id: cache-node-modules
+        with:
+          path: node_modules
+          key: npm-${{ hashFiles('packages/core/package-lock.json') }}-core
 
-      - run: npm test
+      - run: npm i -w packages/core
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+
+      - run: npm test -w packages/core
 
   publish:
     name: Publish @control/gassembly-line
@@ -41,12 +46,16 @@ jobs:
         id: version
         # TODO: maybe check refs/tags as well
         run: echo "version=$(echo "${{ github.event.push.ref }}" | sed -e 's/\-core//')" >> $GITHUB_OUTPUT
+        working-directory: packages/core
 
       - uses: actions/checkout@master
 
       - run: npm version ${{ steps.version.outputs.version }} --no-git-tag-version
         name: Set package version ${{ steps.version.outputs.version }}
+        working-directory: packages/core
+
 
       - run: npm publish
+        working-directory: packages/core
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
