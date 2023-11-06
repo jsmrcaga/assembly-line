@@ -12,7 +12,7 @@ class Resolver {
 		// This implies that it must be the only export
 		const result = require(file_path);
 		if(Object.getPrototypeOf(result) !== this) {
-			throw new Error(`Exported member of ${definition} is not an instance of Scheduler`);
+			throw new Error(`Exported member of ${definition} is not an instance of ${this.constructor.name}`);
 		}
 
 		return result;
