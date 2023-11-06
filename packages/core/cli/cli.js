@@ -44,7 +44,6 @@ if(options.tasks?.length) {
 	};
 }
 
-
 const { config } = require('../src/config')(assembly_config);
 
 const AssemblyLine = require('../src/assembly');
